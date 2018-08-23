@@ -1,26 +1,29 @@
-var http = require('http');
+const express = require('express');
+const path = require("path");
+const PORT = process.env.PORT || 5000;
 
-http.createServer(
-    function(req, res){
-        
-        //var path= req.url.toLowerCase();      
-        var path= req.url.replace(/\/?(?:\?.*)?$/, '').toLowerCase();   //reemplaza cualquier url o simbolo e ingresa al home
-            
-        switch(path){
-            case '':
-                res.writeHead(200, {'Content-Type':'text-plain'});
-                res.end('Home');
-                break;
-            case '/about':
-                res.writeHead(200, {'Content-Type':'text-plain'});
-                res.end('About');
-                break;
-            default:
-                res.writeHead(404, {'Content-Type':'text-plain'});
-                res.end('Error not found');
-                break;
-        }
-    }
-).listen(3000);
-console.log("Servidor en el puerto localhost:3000");
-console.log("Enrutamiento");
+var exphbs = require('express-handlebars');
+
+var app=express();
+
+app.engine('handlebars', 
+           exphbs({defaultLayout: 'main'}));
+
+app.set('view engine', 'handlebars');
+
+app.get('/', (req, res) => res.render('home'));
+
+var fortune = require('./lib/fortune');
+
+app.get('/about',(req,res)=>
+  res.render('about', { fortune: fortune.getFortune() })
+);
+
+//archivos estaticos
+app.use(express.static(path.join(__dirname,'/public')));
+
+
+app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
+
+
+    
