@@ -3,22 +3,20 @@ const path = require("path");
 const PORT = process.env.PORT || 5000;
 
 var exphbs = require('express-handlebars');
-
-var app=express();
+var fortune = require('./lib/fortune');
+var app = express();
 
 app.engine('handlebars', 
            exphbs({defaultLayout: 'main'}));
 
 app.set('view engine', 'handlebars');
 
-//home ruta
-app.get('/', (req, res) => res.render('home'));
-
-//login ruta
-app.get('/login', (req, res) => res.render('login',{csrf: 'abc'}));
+//add modules routers
+var routes = require('./routes/index.js');
+var users = require('./routes/users.js');
 
 //body.parse
-var bodyParser= require('body-parser');
+var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.post('/process', function(req,res){
@@ -27,15 +25,13 @@ app.post('/process', function(req,res){
     console.log('email'+req.body.email);
 });
 
-var fortune = require('./lib/fortune');
-
-app.get('/about',(req,res)=>
-  res.render('about', { fortune: fortune.getFortune() })
-);
 
 //archivos estaticos
 app.use(express.static(path.join(__dirname,'/public')));
 
+//call routers
+app.use('/',routes);
+app.use('/users',users);
 
 app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
